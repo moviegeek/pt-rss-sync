@@ -1,0 +1,9 @@
+{
+  "version": 2,
+  "env": {
+      "HDC_PASSKEY": "@hdc-passkey"
+  },
+  "builds": [
+    { "src": "*.go", "use": "@now/go" }
+  ]
+}

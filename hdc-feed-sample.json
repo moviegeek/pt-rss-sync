@@ -1,0 +1,44 @@
+{
+    "title": "HDChina Torrents",
+    "description": "Latest torrents from HDChina - ",
+    "link": "https://hdchina.org",
+    "published": "Sun, 18 Nov 2018 14:25:26 +0800",
+    "publishedParsed": "2018-11-18T06:25:26Z",
+    "author": {
+        "name": "HDChina Admin",
+        "email": "hdchina.club@gmail.com"
+    },
+    "language": "zh-cn",
+    "image": {
+        "url": "https://hdchina.org/pic/rss_logo.jpg",
+        "title": "HDChina Torrents"
+    },
+    "copyright": "Copyright (c) HDChina 2013-2018, all rights reserved",
+    "generator": "NexusPHP RSS Generator",
+    "feedType": "rss",
+    "feedVersion": "2.0",
+    "items": [
+        {
+            "title": "T2 Trainspotting 2017 Remux 1080p AVC DTS-HD MA5.1-Hyper[22.37 GB]",
+            "description": "xxxx",
+            "link": "https://hdchina.org/details.php?id=296160",
+            "published": "Sun, 18 Nov 2018 13:24:28 +0800",
+            "publishedParsed": "2018-11-18T05:24:28Z",
+            "author": {
+                "name": "zhangminghdw",
+                "email": "zhangminghdw@hdchina.org"
+            },
+            "guid": "16e354a301b2183a4500dc595fc3495d2e510204",
+            "categories": [
+                "电影Movie(1080p)"
+            ],
+            "enclosures": [
+                {
+                    "url": "https://hdchina.org/download.php?id=296160",
+                    "length": "24019491171",
+                    "type": "application/x-bittorrent"
+                }
+            ]
+        }
+    ]
+}
