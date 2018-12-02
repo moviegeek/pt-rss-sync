@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -15,11 +16,21 @@ import (
 const (
 	//HDCRssURL rss link to retrieve hdc movies, you need to add passkey at the end
 	HDCRssURL = "https://hdchina.org/torrentrss.php?rows=50&cat17=1&cat9=1&isize=1"
+	//HDCSiteName name of the source from hdc
+	HDCSiteName = "HDChina"
+	//PutaoSiteName name of the soruce from putao
+	PutaoSiteName = "Putao"
 
 	hdcPasskeyEnvVar = "HDC_PASSKEY"
 	//PutaoRssURL rss link to retrieve putao movies, no need to add passkey
 	PutaoRssURL = "https://pt.sjtu.edu.cn/torrentrss.php?rows=50&cat401=1&cat402=1&cat403=1&sta1=1&sta3=1&isize=1"
 )
+
+type PTMovie struct {
+	pt.MovieInfo
+	ID       string
+	SiteName string
+}
 
 //Handler the serverless entrypoint for `now`
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -39,10 +50,29 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("got hdc feed from %s, contains %d items", hdcFeed.Title, len(hdcFeed.Items))
 
-	updateItemsInDB(hdcFeed.Items, parseHDCItem)
+	hdcMovies := parseFeedItems(hdcFeed.Items, HDCSiteName)
 
+	putaoFeed, err := fp.ParseURL(PutaoRssURL)
+	if err != nil {
+		sendError(w, http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("got putao feed from %s, contains %d items", putaoFeed.Title, len(putaoFeed.Items))
+
+	putaoMovies := parseFeedItems(putaoFeed.Items, PutaoSiteName)
+
+	movies := append(hdcMovies, putaoMovies...)
+
+	data, err := json.Marshal(movies)
+	if err != nil {
+		sendError(w, http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
 	w.WriteHeader(http.StatusOK)
-	w.Write([]byte("{ \"status\": \"success\"}"))
+	w.Write(data)
 }
 
 func addPasskey(url, envVar string) (string, error) {
@@ -56,31 +86,27 @@ func sendError(w http.ResponseWriter, statusCode int) {
 	w.WriteHeader(statusCode)
 }
 
-func updateItemsInDB(items []*gofeed.Item, parseFunc PTItemParser) {
+func parseFeedItems(items []*gofeed.Item, siteName string) []PTMovie {
+	movies := []PTMovie{}
+
 	for _, item := range items {
-		movieInfo := parseFunc(item)
-		log.Printf("parsed movie: %+v", movieInfo)
-	}
-}
+		info := pt.ParseTitle(item.Title)
+		movie := PTMovie{info, "", siteName}
 
-//PTItemParser function definition for parsing a feed item from any pt rss
-type PTItemParser func(*gofeed.Item) pt.MovieInfo
-
-//ParseHDCItem parse an hdc rss feed item and return a MovieInfo
-func parseHDCItem(item *gofeed.Item) pt.MovieInfo {
-	info := pt.ParseHDCTitle(item.Title)
-
-	if item.Link != "" {
-		info.ID = extractID(item.Link)
-	}
-
-	if len(item.Enclosures) > 0 && item.Enclosures[0].Length != "" {
-		if value, err := strconv.ParseUint(item.Enclosures[0].Length, 10, 64); err == nil {
-			info.Size = pt.DigitalFileSize(value)
+		if item.Link != "" {
+			movie.ID = extractID(item.Link)
 		}
+
+		if len(item.Enclosures) > 0 && item.Enclosures[0].Length != "" {
+			if value, err := strconv.ParseUint(item.Enclosures[0].Length, 10, 64); err == nil {
+				info.Size = pt.DigitalFileSize(value)
+			}
+		}
+
+		movies = append(movies, movie)
 	}
 
-	return info
+	return movies
 }
 
 func extractID(url string) string {
