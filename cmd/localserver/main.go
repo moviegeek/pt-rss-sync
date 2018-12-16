@@ -4,6 +4,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+
+	ptsync "github.com/moviegeek/pt-rss-sync"
 )
 
 //main function is for local test
@@ -15,7 +17,7 @@ func main() {
 		port = ":8080"
 	}
 
-	http.HandleFunc("/", Handler)
+	http.HandleFunc("/", ptsync.Handler)
 
 	log.Printf("listening on %s", port)
 	http.ListenAndServe(port, nil)
