@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/justlaputa/movie/pt"
 	"github.com/mmcdole/gofeed"
+	"github.com/moviegeek/pt"
 )
 
 const (
@@ -26,6 +26,7 @@ const (
 	PutaoRssURL = "https://pt.sjtu.edu.cn/torrentrss.php?rows=50&cat401=1&cat402=1&cat403=1&sta1=1&sta3=1&isize=1"
 )
 
+//PTMovie add some extra fields to the pt.MovieInfo
 type PTMovie struct {
 	pt.MovieInfo
 	ID       string
