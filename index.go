@@ -43,25 +43,23 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	fp := gofeed.NewParser()
+	hdcMovies := []PTMovie{}
 	hdcFeed, err := fp.ParseURL(hdcRssURLWithKey)
 	if err != nil {
-		sendError(w, http.StatusInternalServerError)
-		return
+		log.Printf("failed to get HDC Rss, %v", err)
+	} else {
+		log.Printf("got hdc feed from %s, contains %d items", hdcFeed.Title, len(hdcFeed.Items))
+		hdcMovies = parseFeedItems(hdcFeed.Items, HDCSiteName)
 	}
-
-	log.Printf("got hdc feed from %s, contains %d items", hdcFeed.Title, len(hdcFeed.Items))
-
-	hdcMovies := parseFeedItems(hdcFeed.Items, HDCSiteName)
 
 	putaoFeed, err := fp.ParseURL(PutaoRssURL)
+	putaoMovies := []PTMovie{}
 	if err != nil {
-		sendError(w, http.StatusInternalServerError)
-		return
+		log.Printf("failed to get Putao Rss, %v", err)
+	} else {
+		log.Printf("got putao feed from %s, contains %d items", putaoFeed.Title, len(putaoFeed.Items))
+		putaoMovies = parseFeedItems(putaoFeed.Items, PutaoSiteName)
 	}
-
-	log.Printf("got putao feed from %s, contains %d items", putaoFeed.Title, len(putaoFeed.Items))
-
-	putaoMovies := parseFeedItems(putaoFeed.Items, PutaoSiteName)
 
 	movies := append(hdcMovies, putaoMovies...)
 
